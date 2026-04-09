@@ -79,7 +79,55 @@ const registerUser = asyncHandler(async (req, res) => {
 });
 
 const loginUser = asyncHandler(async (req, res) => {
-   
+    // data will fetch from frontend
+    const {email, username, password} = req.body;
+
+    // check all fileld is not empty
+    if(!email || !username || !password){
+        throw new ApiError(400, "fields cannot be empty");
+    }
+
+    // find user by email or username
+    const user = await User.findOne({
+        $or:[
+            {email},
+            {username}
+        ]
+    });
+
+    // if user not found throw error
+    if(!user){
+        throw new ApiError(404, "User not find ");
+    }
+    //compare password
+    const isPasswordValid = await user.isPasswordCorrect(password);
+
+    // if password not match throw error
+     if(!isPasswordValid){
+        throw new ApiError(401, "Invalid credentials");
+    }
+    //generate access token and refresh token
+   const {accessToken, refreshToken} = await generateAccessAndRefreshToken(user._id);
+
+   const loggedInUser = await User.findById(user._id).select("-password -refreshToken");
+
+    //save refresh token in db and access token in cookies
+   const options = {
+    httpOnly: true,
+    secure: true,
+   }
+   return res
+   .status(200)
+   .cookie("accessToken", accessToken, options)
+   .cookie("refreshToken", refreshToken, options)
+   .json(
+       new ApiResponse(
+           200,
+           { user: loggedInUser, accessToken, refreshToken },
+           "User logged in successfully"
+       )
+   );
+
 })
 
 export { registerUser, loginUser};
