@@ -271,9 +271,9 @@ const updateAvatar = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Avatar file is required");
   }
 
-  const updateAvatar = await uploadOnCloudinary(avatarLocalPath);
+  const Avatar = await uploadOnCloudinary(avatarLocalPath);
 
-  if(!updateAvatar.url){
+  if(!Avatar.url){
     throw new ApiError(500, "Failed to upload avatar");
   }
 
@@ -281,7 +281,7 @@ const updateAvatar = asyncHandler(async (req, res) => {
     req.user?._id,
     {
       $set: {
-        avatar: updateAvatar.url
+        avatar: Avatar.url
       }
     },
     {
@@ -303,9 +303,9 @@ const updateCoverImage = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Cover image file is required");
   }
 
-  const updateCoverImage = await uploadOnCloudinary(coverImageLocalPath);
+  const CoverImage = await uploadOnCloudinary(coverImageLocalPath);
 
-  if(!updateCoverImage.url){
+  if(!CoverImage.url){
     throw new ApiError(500, "Failed to upload cover image");
   }
 
@@ -313,7 +313,7 @@ const updateCoverImage = asyncHandler(async (req, res) => {
     req.user?._id,
     {
       $set: {
-        coverImage: updateCoverImage.url
+        coverImage: CoverImage.url
       }
     },
     {
